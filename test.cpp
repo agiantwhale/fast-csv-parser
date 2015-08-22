@@ -15,9 +15,8 @@
  *
  * =====================================================================================
  */
-#define CSV_PATH "/Users/iljae/Development/fast-csv-parser/csv/MOCK_DATA.csv"
-
 #include "CsvParser.h"
+#include <config.h>
 #include <gtest/gtest.h>
 
 const char * GetNextField(char *& cursor);

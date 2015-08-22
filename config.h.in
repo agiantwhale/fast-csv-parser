@@ -1,0 +1,6 @@
+#ifndef FAST_CSV_PARSER_CONFIG_H
+#define FAST_CSV_PARSER_CONFIG_H
+
+#define CSV_PATH "@TEST_CSV_PATH@"
+
+#endif
