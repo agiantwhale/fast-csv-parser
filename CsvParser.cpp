@@ -57,7 +57,8 @@ CsvParser::CsvParser(const std::string &file_path) :
 }
 CsvParser::~CsvParser() {
   FreeLine();
-  fclose(static_cast<FILE*>(file_));
+  if(file_!=nullptr)
+    fclose(static_cast<FILE*>(file_));
 }
 bool CsvParser::ReadLine(unsigned int lines) {
   // FreeLine();
