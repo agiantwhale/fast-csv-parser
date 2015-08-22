@@ -14,6 +14,18 @@ public:
   Row() : std::vector<const char*>() {};
 };
 
+class Rows : public std::vector<Row> {
+  friend class CsvParser;
+public:
+  Rows(unsigned int lines) :
+  std::vector<Row>(lines),
+  valid_rows_(0) {}
+  int valid_rows() {return valid_rows_;}
+
+private:
+  int valid_rows_;
+};
+
 class CsvParser {
   public:
     CsvParser(const std::string& File_path);
@@ -21,10 +33,10 @@ class CsvParser {
 
     bool Init();
     bool Read(Row &row);
-    bool Read(Row *rows, unsigned int lines=1);
+    bool Read(Rows &rows);
 
   private:
-    bool ReadLine();
+    bool ReadLine(unsigned int lines=1);
     bool FreeLine();
 
     std::string file_path_;
@@ -32,11 +44,10 @@ class CsvParser {
     // File information count
     void *file_;
     int current_line_;
-    int fields_count_;
 
     // Current line information
-    std::vector<void*> lines_;
-    char *line_current_;
+    std::vector<std::pair<void*,size_t>> lines_;
+    int valid_lines_;
 };
 
 
