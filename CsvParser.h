@@ -46,7 +46,7 @@ class CsvParser {
     int current_line_;
 
     // Current line information
-    std::vector<std::pair<void*,size_t>> lines_;
+    std::vector< std::pair<void*,size_t> > lines_;
     int valid_lines_;
 };
 
