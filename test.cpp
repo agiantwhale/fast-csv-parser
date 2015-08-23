@@ -16,6 +16,7 @@
  * =====================================================================================
  */
 #include "CsvParser.h"
+#include <iostream>
 #include <config.h>
 #include <gtest/gtest.h>
 

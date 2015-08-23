@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include <threadpool/ThreadPool.h>
 
 class Row : public std::vector<const char*> {
 public:
@@ -28,7 +29,7 @@ private:
 
 class CsvParser {
   public:
-    CsvParser(const std::string& File_path);
+    CsvParser(const std::string& File_path, int threads=0);
     virtual ~CsvParser();
 
     bool Init();
@@ -48,6 +49,9 @@ class CsvParser {
     // Current line information
     std::vector< std::pair<void*,size_t> > lines_;
     int valid_lines_;
+
+    // Thread pool
+    ThreadPool pool_;
 };
 
 

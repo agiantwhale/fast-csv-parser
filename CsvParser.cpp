@@ -4,7 +4,7 @@
 
 #include "CsvParser.h"
 #include <cstdlib>
-#include <boost/thread.hpp>
+#include <thread>
 
 const char * GetNextField(char *& cursor){
   if(*cursor==0) return nullptr;
@@ -48,12 +48,14 @@ void PopulateRow(Row &row,char *start){
   }
 }
 
-CsvParser::CsvParser(const std::string &file_path) :
+CsvParser::CsvParser(const std::string &file_path, int threads) :
   file_path_(file_path),
   file_(nullptr),
   current_line_(0),
   lines_(),
-  valid_lines_(0) {
+  valid_lines_(0),
+  pool_(threads==0?
+      std::thread::hardware_concurrency() : threads) {
 }
 CsvParser::~CsvParser() {
   FreeLine();
@@ -75,10 +77,7 @@ bool CsvParser::ReadLine(unsigned int lines) {
 
   valid_lines_=0;
 
-  for(auto line_iter=lines_.begin();
-      line_iter!=lines_.end();
-      line_iter++){
-    auto &line=*line_iter;
+  for(auto &line:lines_){
     if(getline((char**)&line.first,&line.second,static_cast<FILE*>(file_))!=-1){
       valid_lines_++;
       current_line_++;
@@ -87,10 +86,7 @@ bool CsvParser::ReadLine(unsigned int lines) {
   return true;
 }
 bool CsvParser::FreeLine() {
-  for(auto line_iter=lines_.begin();
-      line_iter!=lines_.end();
-      line_iter++) {
-    auto &line=*line_iter;
+  for(auto &line:lines_) {
     free(line.first);
   }
   lines_.clear();
@@ -118,16 +114,21 @@ bool CsvParser::Read(Rows &rows) {
   if(!read_result &&
       valid_lines_==0) return false;
 
-  boost::thread_group field_searches;
+  std::vector< std::future<void> > results(valid_lines_);
   for(int i=0;i<valid_lines_;i++){
-    field_searches.add_thread(
-        new boost::thread(
-          PopulateRow,rows[i],
-          static_cast<char*>(lines_[i].first)
-          )
-        );
+    results.emplace_back(
+      pool_.enqueue(
+        PopulateRow,
+        std::ref(rows[i]),
+        static_cast<char*>(lines_[i].first)
+      )
+    );
   }
-  field_searches.join_all();
+  for(auto & result: results) {
+    if(result.valid()){
+      result.wait();
+    }
+  }
 
   return true;
 }
